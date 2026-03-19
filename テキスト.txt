@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>特定行為記録</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icon.png">
+
+<style>
+body { font-family: sans-serif; margin: 10px; }
+button { padding: 12px; margin: 5px; font-size: 16px; }
+.timeline div { padding: 5px; border-bottom: 1px solid #ccc; }
+</style>
+</head>
+
+<body>
+
+<h2>特定行為記録</h2>
+
+<div>
+<button onclick="addIV()">静脈路</button>
+<button onclick="addAd()">アドレナリン</button>
+<button onclick="addLT()">LT</button>
+<button onclick="addTube()">挿管</button>
+<button onclick="addGlu()">ブドウ糖</button>
+</div>
+
+<h3>タイムライン</h3>
+<div class="timeline" id="timeline"></div>
+
+<br>
+<button onclick="generate()">記録生成</button>
+<button onclick="pdf()">PDF</button>
+<button onclick="clearData()">リセット</button>
+
+<pre id="output"></pre>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+
+let data = JSON.parse(localStorage.getItem("records") || "[]");
+
+function now(){
+  return new Date().toLocaleTimeString();
+}
+
+function save(){
+  localStorage.setItem("records", JSON.stringify(data));
+}
+
+function render(){
+  document.getElementById("timeline").innerHTML =
+    data.map(d => `<div>${d}</div>`).join("");
+}
+
+function addIV(){
+  data.push(now()+" 静脈路確保（成功）");
+  save(); render();
+}
+
+function addAd(){
+  data.push(now()+" アドレナリン1mg");
+  save(); render();
+}
+
+function addLT(){
+  data.push(now()+" LT挿入（成功）");
+  save(); render();
+}
+
+function addTube(){
+  data.push(now()+" 挿管（成功）");
+  save(); render();
+}
+
+function addGlu(){
+  data.push(now()+" ブドウ糖投与");
+  save(); render();
+}
+
+function generate(){
+  let text = data.join("。\n") + "。";
+  document.getElementById("output").innerText = text;
+}
+
+function pdf(){
+  let w = window.open();
+  w.document.write("<pre>"+document.getElementById("output").innerText+"</pre>");
+  w.print();
+}
+
+function clearData(){
+  if(confirm("消す？")){
+    data=[]; save(); render();
+  }
+}
+
+render();
+</script>
+
+</body>
+</html>
